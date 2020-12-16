@@ -4,11 +4,7 @@ var passportLocalMongoose = require('passport-local-mongoose');
 
 var LoginHistory = new Schema({
     username: String,
-    password: String,
-    admin:   {
-        type: Boolean,
-        default: false
-    }
+    lastLogin : Date
 });
 
 LoginHistory.plugin(passportLocalMongoose);

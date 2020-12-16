@@ -5,7 +5,6 @@ var User = require('../models/user');
 var passport = require('passport');
 var authenticate = require('../authenticate');
 var Check = require('../models/check');
-const { findById } = require('../models/user');
 
 
 var router = express.Router();

@@ -3,12 +3,12 @@ var bodyParser = require('body-parser');
 var User = require('../models/user');
 var passport = require('passport');
 var authenticate = require('../authenticate');
-
+const loginHistory = require('../models/login-history');
+var cors = require('cors')
 var router = express.Router();
 router.use(bodyParser.json());
 
-
-router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+router.get('/', authenticate.verifyUser, (req, res, next) => {
   User.find({}, (err, users) => {
     if (err) {
       return next(err);
@@ -20,9 +20,9 @@ router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, ne
   })
 });
 
-router.post('/signup', (req, res, next) => {
+router.post('/register', cors(), (req, res, next) => {
   User.register(new User({
-      username: req.body.username
+      username: req.body.username,
     }),
     req.body.password, (err, user) => {
       if (err) {
@@ -32,11 +32,11 @@ router.post('/signup', (req, res, next) => {
           err: err
         });
       } else {
-        if (req.body.firstname) {
-          user.firstname = req.body.firstname;
+        if (req.body.firstName) {
+          user.firstName = req.body.firstName;
         }
-        if (req.body.lastname) {
-          user.lastname = req.body.lastname;
+        if (req.body.lastName) {
+          user.lastName = req.body.lastName;
         }
         user.save((err, user) => {
           passport.authenticate('local')(req, res, () => {
@@ -66,14 +66,27 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
     firstname: req.user.firstname,
     lastname: req.user.lastname
   });
-
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'application/json');
-  res.json({
-    success: true,
-    status: 'You are successfully logged in!',
-    token: token
-  });
+  loginhist = new loginHistory({
+    username : req.body.username,
+    lastLogin : Date()
+  }) 
+  loginhist.save((err, user) => {
+    if (err) {
+      res.statusCode = 500;
+      res.setHeader('Content-Type', 'application/json');
+      res.json({
+        err: err
+      });
+      return;
+    }
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.json({
+      success: true,
+      status: 'You are successfully logged in!',
+      token: token
+    });
+  })
 });
 
 
