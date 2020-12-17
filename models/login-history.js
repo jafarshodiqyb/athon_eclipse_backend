@@ -3,8 +3,11 @@ var Schema = mongoose.Schema;
 var passportLocalMongoose = require('passport-local-mongoose');
 
 var LoginHistory = new Schema({
-    username: String,
-    lastLogin : Date
+  username: String,
+  firstName: String,
+  lastName: String,
+
+  lastLogin: Date,
 });
 
 LoginHistory.plugin(passportLocalMongoose);

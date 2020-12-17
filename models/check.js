@@ -14,11 +14,6 @@ var Check = new Schema({
         endDate:Date,
         assignee:String,
         creator:String,
-        comments:[{
-            comment:String,
-            commentDate:Date,
-            img_url:String,
-        }]
          }]
 });
 

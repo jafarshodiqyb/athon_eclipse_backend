@@ -68,6 +68,8 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
   });
   loginhist = new loginHistory({
     username : req.body.username,
+    firstName: req.user.firstName,
+    lastName: req.user.lastName,
     lastLogin : Date()
   }) 
   loginhist.save((err, user) => {
@@ -84,6 +86,9 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
     res.json({
       success: true,
       status: 'You are successfully logged in!',
+      username : user.username,
+      firstName : user.firstName,
+      lastName : user.lastName,
       token: token
     });
   })

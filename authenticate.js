@@ -38,7 +38,6 @@ exports.jwtPassport = passport.use(new JwtStrategy(opts, (jwt_payload, done) => 
 }));
 
 exports.verifyUser = function (req, res, next) {
-    console.log(req.headers)
     var auth = req.headers.authorization? req.headers.authorization.substring(7, req.headers.authorization.length):null;
     var token = req.body.token || req.query.token ||  auth ||req.headers['x-access-token'];
     if (token) {

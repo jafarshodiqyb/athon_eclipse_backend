@@ -10,12 +10,10 @@ var Check = require('../models/check');
 var router = express.Router();
 router.use(bodyParser.json());
 
-router
-// .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
-.get('/checkin/:username',authenticate.verifyUser, (req, res, next) => {
+router.get('/checkin/:username',authenticate.verifyUser, (req, res, next) => {
     var id = req.params.username
     Check.findOne({username:id}).lean().exec((err,users)=>{
-      if (err) {
+      if (err || users==null|| users==[]) {
               return next(err);
             } else {
               res.statusCode = 200;
@@ -75,16 +73,15 @@ router.put('/checkout', authenticate.verifyUser, (req, res, next) => {
 
 router.post('/activity',authenticate.verifyUser, (req, res, next) => {
     Check.findOne({username :req.body.username},(err, user) =>{
-      console.log(user)
       if (err) {
         return next(err);
       }  else{
+        console.log(req.body)
         var activitiesTemp = req.body.activities
         activitiesTemp.createdDate = Date()
         activitiesTemp.assignee = req.body.username
         activitiesTemp.creator = req.body.username
         user.activities = user.activities.concat([activitiesTemp])
-        console.log(user.activities)
         // user.activities.push(req.body.activities)
         user.save()
         .then((checkStatus) => {
