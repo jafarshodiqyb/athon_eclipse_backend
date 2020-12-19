@@ -59,41 +59,29 @@ router.post('/register', cors(), (req, res, next) => {
       }
     });
 });
-
-router.post('/login', passport.authenticate('local'), (req, res) => {
-  var token = authenticate.getToken({
-    _id: req.user._id,
-    firstname: req.user.firstname,
-    lastname: req.user.lastname
-  });
-  loginhist = new loginHistory({
-    username : req.body.username,
-    firstName: req.user.firstName,
-    lastName: req.user.lastName,
-    lastLogin : Date()
-  }) 
-  loginhist.save((err, user) => {
+router.post('/login', function(req, res, next) {
+  passport.authenticate('local', function(err, user, info) {
     if (err) {
-      res.statusCode = 500;
-      res.setHeader('Content-Type', 'application/json');
-      res.json({
-        err: err
-      });
-      return;
+      return next(err);
     }
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.json({
-      success: true,
-      status: 'You are successfully logged in!',
-      username : user.username,
-      firstName : user.firstName,
-      lastName : user.lastName,
-      token: token
-    });
-  })
+    if (!user) {
+      return res.status(401).json({
+        err: info
+      });
+    }
+      var token = authenticate.getToken(user);
+        res.status(200).json({
+        status: 'Login successful!',
+        success: true,
+        token: token,
+        username : user.username,
+        firstName : user.firstName,
+        lastName : user.lastName,
+              // token: token
+      });
+    
+  })(req,res,next);
 });
-
 
 router.get('/logout', function(req, res) {
   req.logout();

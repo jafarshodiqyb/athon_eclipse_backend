@@ -34,7 +34,7 @@ router.post('/checkin',authenticate.verifyUser, (req, res, next) => {
                         lastCheckOut : "",
                         activities:[]
                     });
-                }else if(user && moment(user.lastCheckIn).isSame(moment(), 'day')){
+              }else if(user && moment(user.lastCheckIn).isSame(moment(), 'day')){
                   return next('You have checked in today!');
                 } else {
                   user.lastCheckIn = Date()
@@ -54,7 +54,7 @@ router.post('/checkin',authenticate.verifyUser, (req, res, next) => {
 });
 router.put('/checkout', authenticate.verifyUser, (req, res, next) => {   
   Check.findOne({username:req.body.username}).lean().exec((err,user)=>{
-    if(!user.lastCheckOut){
+    if(!user.lastCheckOut || !moment(user.lastCheckOut).isSame(moment(), 'day')){
       Check.findOneAndUpdate({username :req.body.username},{lastCheckOut:Date()},(err, updated) =>{
         if (err) {
           return next(err);
