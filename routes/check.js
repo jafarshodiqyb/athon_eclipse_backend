@@ -3,6 +3,7 @@ var bodyParser = require('body-parser');
 var moment = require('moment');
 var User = require('../models/user');
 var passport = require('passport');
+const checkHistory = require('../models/check-history');
 var authenticate = require('../authenticate');
 var Check = require('../models/check');
 
@@ -27,6 +28,7 @@ router.post('/checkin',authenticate.verifyUser, (req, res, next) => {
         Check.find({})
             .then((check) => {
                 var user = check.filter(cek => cek.username.toString() === req.body.username.toString())[0];
+                var checkInHistory;
                 if(!user) {
                     user = new Check({
                         username: req.body.username,
@@ -34,18 +36,36 @@ router.post('/checkin',authenticate.verifyUser, (req, res, next) => {
                         lastCheckOut : "",
                         activities:[]
                     });
+                    checkInHistory = new checkHistory({
+                      username: req.body.username,
+                      lastCheckIn : Date(),
+                      lastCheckOut : "",
+                    })
+
               }else if(user && moment(user.lastCheckIn).isSame(moment(), 'day')){
                   return next('You have checked in today!');
                 } else {
                   user.lastCheckIn = Date()
+                  checkInHistory.lastCheckIn = Date()
                 }
                 user.save()
                     .then((checkStatus) => {
+
+                      
                         res.statusCode = 201;
                         res.setHeader("Content-Type", "application/json");
                         res.json(checkStatus);
-                        console.log("check");
-                    }, (err) => next(err))
+                        console.log("check in");
+                    }, (err) => next(err)).then(
+                      (result=>{
+                        checkInHistory.save().then((checkInHistoryStatus)=>{
+                          res.statusCode = 201;
+                        res.setHeader("Content-Type", "application/json");
+                        res.json(checkInHistoryStatus);
+                        console.log("check in History");
+                        }), (err) => next(err)
+                      })
+                    )
                     .catch((err) => next(err));
                 
             })
@@ -59,9 +79,14 @@ router.put('/checkout', authenticate.verifyUser, (req, res, next) => {
         if (err) {
           return next(err);
         } else{
-          res.statusCode = 200;
-          res.setHeader('Content_type', 'application/json');
-          res.json(updated);
+          //find checkoutHistory
+          const today = moment().startOf('day')
+          checkHistory.findOneAndUpdate({username:req.body.username,  lastCheckIn : {$gte: today.toDate(),
+            $lte: moment(today).endOf('day').toDate()} } ,{lastCheckOut:Date()},(err,updated)=>{
+              res.statusCode = 201;
+            res.setHeader("Content-Type", "application/json");
+            res.json(updated);
+          })
         }  
       })
     } else 
