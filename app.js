@@ -5,11 +5,11 @@ var logger = require('morgan');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 var cors = require('cors');
 var config = require('./config');
 
-mongoose.connect(config.mongoUrl);
+mongoose.connect(config.mongo.mongoUrl);
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
@@ -38,7 +38,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // passport config
-var User = require('./models/user');
 app.use(passport.initialize());
 app.use(passport.session())
 

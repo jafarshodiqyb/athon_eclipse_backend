@@ -1,4 +1,6 @@
 var passport = require('passport');
+var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+// var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var LocalStrategy = require('passport-local').Strategy;
 var User = require('./models/user');
 var JwtStrategy = require('passport-jwt').Strategy;
@@ -8,18 +10,49 @@ var jwt = require('jsonwebtoken');
 var config = require('./config');
 
 exports.local = passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+exports.google = passport.use(
+    new GoogleStrategy({
+        clientID: config.google.clientID,
+        clientSecret: config.google.clientSecret,
+        callbackURL: `http://localhost:3000/users/auth/google/redirect`,
+        
+    }, async function(accessToken, refreshToken, profile, done) {
+        // passport callback function
+        //check if user already exists in our db with the given profile ID
+        await User.findOne({username: profile.id}).then((currentUser)=>{
+          if(currentUser){
+            //if we already have a record with the given profile ID
+            done(null, currentUser);
+          } else{
+               //if not, create a new user 
+              new User({
+                username: profile.id,
+                firstName: profile.name.givenName,
+                lastName: profile.name.familyName,
+              }).save().then((newUser) =>{
+                done(null, newUser);
+              });
+           } 
+        })
+      })
+  );
+  passport.serializeUser(function(user, done) {
+    done(null, user);
+  });
+  
+  passport.deserializeUser(function(user, done) {
+    done(null, user);
+  });
 
 exports.getToken = function (user) {
-    return jwt.sign(user, config.secretKey, {
+    return jwt.sign(user, config.mongo.secretKey, {
         expiresIn: 3600
     });
 }
 
 var opts = {};
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-opts.secretOrKey = config.secretKey;
+opts.secretOrKey = config.mongo.secretKey;
 
 exports.jwtPassport = passport.use(new JwtStrategy(opts, (jwt_payload, done) => {
     console.log("JWT Payload : ", jwt_payload);
@@ -41,7 +74,7 @@ exports.verifyUser = function (req, res, next) {
     var auth = req.headers.authorization? req.headers.authorization.substring(7, req.headers.authorization.length):null;
     var token = req.body.token || req.query.token ||  auth ||req.headers['x-access-token'];
     if (token) {
-        jwt.verify(token, config.secretKey, function (err, decoded) {
+        jwt.verify(token, config.mongo.secretKey, function (err, decoded) {
             if (err) {
                 var err = new Error('You are not authenticated!');
                 err.status = 401;
