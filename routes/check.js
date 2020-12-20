@@ -36,18 +36,19 @@ router.post('/checkin',authenticate.verifyUser, (req, res, next) => {
                         lastCheckOut : "",
                         activities:[]
                     });
-                    checkInHistory = new checkHistory({
-                      username: req.body.username,
-                      lastCheckIn : Date(),
-                      lastCheckOut : "",
-                    })
+                    
 
               }else if(user && moment(user.lastCheckIn).isSame(moment(), 'day')){
                   return next('You have checked in today!');
                 } else {
                   user.lastCheckIn = Date()
-                  checkInHistory.lastCheckIn = Date()
+                  // checkInHistory.lastCheckIn = Date()
                 }
+                checkInHistory = new checkHistory({
+                  username: req.body.username,
+                  lastCheckIn : Date(),
+                  lastCheckOut : "",
+                })
                 user.save()
                     .then((checkStatus) => {
 
@@ -58,6 +59,8 @@ router.post('/checkin',authenticate.verifyUser, (req, res, next) => {
                         console.log("check in");
                     }, (err) => next(err)).then(
                       (result=>{
+                console.log(checkInHistory)
+
                         checkInHistory.save().then((checkInHistoryStatus)=>{
                           res.statusCode = 201;
                         res.setHeader("Content-Type", "application/json");
