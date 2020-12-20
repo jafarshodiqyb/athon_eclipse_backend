@@ -120,7 +120,7 @@ lib/
 data/
 *.txt
 .scannerwork/
-bin/
+# bin/
 test/
 temp/
 
