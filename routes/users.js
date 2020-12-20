@@ -64,18 +64,6 @@ router.post('/register', cors(), (req, res, next) => {
 router.get(
   "/auth/google",
   passport.authenticate("google",{scope: ["profile", "email"]}))
-
-// router.get(
-//   "/auth/google/redirect",
-//   passport.authenticate("google", {
-//     scope: ["profile", "email"],
-//     // failureRedirect: 'http://localhost:3006/login',
-//     successRedirect: 'http://localhost:3006/login ',
-//   },(req,res)=>{
-//     console.log('tes',req)
-
-//     }
-// ))
 router.get('/auth/google/redirect',(req,res,next)=>{
 
   passport.authenticate('google',function(err,user,info){
@@ -92,33 +80,6 @@ router.get('/auth/google/redirect',(req,res,next)=>{
 
 
 })
-// router.get('/google', function(req, res, next) {
-//   passport.authenticate('google', {
-//     scope: ['profile', 'email'],
-//   }, function(err, user, info) {
-//      console.log(info)
-//     if (err) {
-//       return next(err);
-//     }
-//     if (!user) {
-//       return res.status(401).json({
-//         err: info
-//       });
-//     }
-//       var token = authenticate.getToken(user);
-//         res.status(200).json({
-//         status: 'Login successful!',
-//         success: true,
-//         token: token,
-//         username : user.username,
-//         firstName : user.firstName,
-//         lastName : user.lastName,
-//               // token: token
-//       });
-    
-//   })(req,res,next);
-// });
-
 router.post('/login', function(req, res, next) {
   passport.authenticate('local', function(err, user, info) {
     if (err) {

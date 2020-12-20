@@ -55,7 +55,6 @@ opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = config.mongo.secretKey;
 
 exports.jwtPassport = passport.use(new JwtStrategy(opts, (jwt_payload, done) => {
-    console.log("JWT Payload : ", jwt_payload);
     User.findOne({
         _id: jwt_payload._id
     }, (err, user) => {

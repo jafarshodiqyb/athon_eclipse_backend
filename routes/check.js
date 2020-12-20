@@ -56,16 +56,13 @@ router.post('/checkin',authenticate.verifyUser, (req, res, next) => {
                         res.statusCode = 201;
                         res.setHeader("Content-Type", "application/json");
                         res.json(checkStatus);
-                        console.log("check in");
                     }, (err) => next(err)).then(
                       (result=>{
-                console.log(checkInHistory)
 
                         checkInHistory.save().then((checkInHistoryStatus)=>{
                           res.statusCode = 201;
                         res.setHeader("Content-Type", "application/json");
                         res.json(checkInHistoryStatus);
-                        console.log("check in History");
                         }), (err) => next(err)
                       })
                     )
@@ -104,7 +101,6 @@ router.post('/activity',authenticate.verifyUser, (req, res, next) => {
       if (err) {
         return next(err);
       }  else{
-        console.log(req.body)
         var activitiesTemp = req.body.activities
         activitiesTemp.createdDate = Date()
         activitiesTemp.assignee = req.body.username
