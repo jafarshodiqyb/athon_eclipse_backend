@@ -19,14 +19,14 @@ exports.google = passport.use(
     }, async function(accessToken, refreshToken, profile, done) {
         // passport callback function
         //check if user already exists in our db with the given profile ID
-        await User.findOne({username: profile.id}).then((currentUser)=>{
+        await User.findOne({username: profile.emails[0].value}).then((currentUser)=>{
           if(currentUser){
             //if we already have a record with the given profile ID
             done(null, currentUser);
           } else{
                //if not, create a new user 
               new User({
-                username: profile.id,
+                username: profile.emails[0].value,
                 firstName: profile.name.givenName,
                 lastName: profile.name.familyName,
               }).save().then((newUser) =>{
