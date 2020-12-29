@@ -7,6 +7,9 @@ var User = new Schema({
     firstName: String,
     lastName:String,
     password: String,
+    image:String,
+    address:String,
+    motto:String,
     admin:   {
         type: Boolean,
         default: false

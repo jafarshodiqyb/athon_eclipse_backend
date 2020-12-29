@@ -39,6 +39,15 @@ router.post('/register', cors(), (req, res, next) => {
         if (req.body.lastName) {
           user.lastName = req.body.lastName;
         }
+        if (req.body.address){
+          user.address = req.body.address;
+        }
+        if (req.body.image){
+          user.image = req.body.image;
+        }
+        if (req.body.motto){
+          user.motto = req.body.motto;
+        }
         user.save((err, user) => {
           passport.authenticate('local')(req, res, () => {
             if (err) {
@@ -60,6 +69,23 @@ router.post('/register', cors(), (req, res, next) => {
       }
     });
 });
+router.put('/register',authenticate.verifyUser, (req, res, next) => {
+  User.findOneAndUpdate(
+    { username:req.body.username },
+    
+        req.body
+    ,
+    (err,update)=>{
+      if (err) {
+        return next(err);
+      } else{
+        res.statusCode = 200;
+        res.setHeader('Content_type', 'application/json');
+        res.json(update);
+      }
+    })
+
+});
 
 router.get(
   "/auth/google",
@@ -73,6 +99,8 @@ router.get('/auth/google/redirect',(req,res,next)=>{
       username: user.username,
       firstName: user.firstName,
       lastName: user.lastName,
+      address: user.address || "",
+      motto: user.motto|| ""
     }
     res.redirect('http://localhost:3006/login/' +new URLSearchParams(payload))
 
@@ -98,6 +126,8 @@ router.post('/login', function(req, res, next) {
         username : user.username,
         firstName : user.firstName,
         lastName : user.lastName,
+        address: user.address || "",
+      motto: user.motto|| ""
               // token: token
       });
     
