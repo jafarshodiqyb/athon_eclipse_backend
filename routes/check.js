@@ -140,6 +140,9 @@ router.put('/activity',authenticate.verifyUser, (req, res, next) => {
     { 
         "$set": {
             "activities.$.activity": req.body.activities.activity
+        },
+        "$set": {
+          "activities.$.status": req.body.activities.status
         }
     },
     (err,updatedComment)=>{

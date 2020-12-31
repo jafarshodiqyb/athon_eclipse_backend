@@ -7,13 +7,18 @@ var Check = new Schema({
     lastCheckOut : Date,
     activities : [{
         activity : String,
-        description:String,
-        // subactivty:[],
         createdDate : Date,
         startDate:Date,
         endDate:Date,
         assignee:String,
-        creator:String,
+        source:   {
+            type: String,
+            default: 'diarium'
+        },
+        status:   {
+            type: String,
+            default: 'todo'
+        },
          }]
 });
 
