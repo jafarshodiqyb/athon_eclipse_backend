@@ -6,8 +6,10 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const cloudinary = require('cloudinary')
 var cors = require('cors');
 var config = require('./config');
+const formData = require('express-form-data')
 
 mongoose.connect(config.mongo.mongoUrl);
 var db = mongoose.connection;
@@ -16,16 +18,23 @@ db.once('open', function () {
     // we're connected!
     console.log("Connected correctly to server");
 });
-
+cloudinary.config({ 
+  cloud_name: config.cloudinary.cloud_name, 
+  api_key: config.cloudinary.api_key, 
+  api_secret: config.cloudinary.api_secret
+})
+  
 var index = require('./routes/index');
 var users = require('./routes/users');
 var check = require('./routes/check');
+var stories = require('./routes/stories');
 
 // var dishRouter = require('./routes/dishRouter');
 // var promoRouter = require('./routes/promoRouter');
 // var leaderRouter = require('./routes/leaderRouter');
 
 var app = express();
+app.use(formData.parse())
 app.use(cors())
 app.set('port', 3000);
 // view engine setup
@@ -47,6 +56,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 app.use('/users', users);
 app.use('/check', check);
+app.use('/stories', stories);
+
 
 // app.use('/dishes',dishRouter);
 // app.use('/promotions',promoRouter);

@@ -9,8 +9,9 @@ var jwt = require('jsonwebtoken');
 
 router.use(bodyParser.json());
 
-router.get('/', authenticate.verifyUser, (req, res, next) => {
-  User.find({}, (err, users) => {
+router.get('/:user', authenticate.verifyUser, (req, res, next) => {
+  var user = req.params.user
+  User.find({username:user}, (err, users) => {
     if (err) {
       return next(err);
     } else {
@@ -41,13 +42,13 @@ router.post('/register', cors(), (req, res, next) => {
         }
         if (req.body.address){
           user.address = req.body.address;
-        }
+        }else user.address = ""
         if (req.body.image){
           user.image = req.body.image;
-        }
+        } else user.image = ""
         if (req.body.motto){
           user.motto = req.body.motto;
-        }
+        }else user.motto = ""
         user.save((err, user) => {
           passport.authenticate('local')(req, res, () => {
             if (err) {
@@ -69,7 +70,7 @@ router.post('/register', cors(), (req, res, next) => {
       }
     });
 });
-router.put('/register',authenticate.verifyUser, (req, res, next) => {
+router.put('/update-user',authenticate.verifyUser, (req, res, next) => {
   User.findOneAndUpdate(
     { username:req.body.username },
     
@@ -79,6 +80,7 @@ router.put('/register',authenticate.verifyUser, (req, res, next) => {
       if (err) {
         return next(err);
       } else{
+        console.log(update)
         res.statusCode = 200;
         res.setHeader('Content_type', 'application/json');
         res.json(update);
@@ -97,10 +99,12 @@ router.get('/auth/google/redirect',(req,res,next)=>{
     var payload = {
       token: token,
       username: user.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      address: user.address || "",
-      motto: user.motto|| ""
+      // firstName: user.firstName,
+      // lastName: user.lastName,
+      // address: user.address || "",
+      // motto: user.motto|| "",
+      // image: user.image|| "",
+
     }
     res.redirect('http://localhost:3006/login/' +new URLSearchParams(payload))
 
@@ -124,10 +128,12 @@ router.post('/login', function(req, res, next) {
         success: true,
         token: token,
         username : user.username,
-        firstName : user.firstName,
-        lastName : user.lastName,
-        address: user.address || "",
-      motto: user.motto|| ""
+        // firstName : user.firstName,
+        // lastName : user.lastName,
+        // address: user.address || "",
+        // motto: user.motto|| "",
+        // image: user.image|| "",
+
               // token: token
       });
     
@@ -141,4 +147,23 @@ res.status(200).json({
 });
 });
 
+router.get('/refresh-token/:user', authenticate.verifyUser, (req, res, next) => {
+  var user = req.params.user
+  User.find({username:user}, (err, users) => {
+    console.log(users)
+    if (err) {
+      return next(err);
+    } else {
+      var token = authenticate.getToken(users);
+        res.status(200).json({
+        status: 'Login successful!',
+        success: true,
+        token: token,
+        username : user,
+
+              // token: token
+      });
+    }
+  })
+});
 module.exports = router;

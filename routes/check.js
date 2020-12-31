@@ -75,7 +75,7 @@ router.post('/checkin',authenticate.verifyUser, (req, res, next) => {
 router.put('/checkout', authenticate.verifyUser, (req, res, next) => {   
   Check.findOne({username:req.body.username}).lean().exec((err,user)=>{
     if(!user.lastCheckOut || !moment(user.lastCheckOut).isSame(moment(), 'day')){
-      Check.findOneAndUpdate({username :req.body.username},{lastCheckOut:Date()},(err, updated) =>{
+      Check.findOneAndUpdate({username :req.body.username},{lastCheckOut:Date()},(err, updatedCheckout) =>{
         if (err) {
           return next(err);
         } else{
@@ -83,9 +83,10 @@ router.put('/checkout', authenticate.verifyUser, (req, res, next) => {
           const today = moment().startOf('day')
           checkHistory.findOneAndUpdate({username:req.body.username,  lastCheckIn : {$gte: today.toDate(),
             $lte: moment(today).endOf('day').toDate()} } ,{lastCheckOut:Date()},(err,updated)=>{
+              
               res.statusCode = 201;
             res.setHeader("Content-Type", "application/json");
-            res.json(updated);
+            res.json(updatedCheckout);
           })
         }  
       })
