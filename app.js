@@ -28,6 +28,8 @@ var index = require('./routes/index');
 var users = require('./routes/users');
 var check = require('./routes/check');
 var stories = require('./routes/stories');
+var posts = require('./routes/posts');
+
 
 // var dishRouter = require('./routes/dishRouter');
 // var promoRouter = require('./routes/promoRouter');
@@ -57,6 +59,8 @@ app.use('/', index);
 app.use('/users', users);
 app.use('/check', check);
 app.use('/stories', stories);
+app.use('/posts', posts);
+
 
 
 // app.use('/dishes',dishRouter);
