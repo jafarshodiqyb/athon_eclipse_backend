@@ -1,5 +1,7 @@
 const User = require('./../models/user');
 const { validationResult } = require('express-validator');
+const { sendEmail } = require('./../helpers/mail');
+const crypto = require('crypto');
 
 exports.register = async (req, res) => {
   try {
@@ -8,7 +10,6 @@ exports.register = async (req, res) => {
     const error = errors
       .array()
       .map((error) => ({ message: error.msg, param: error.param }))[0];
-    console.log(error);
 
     if (!errors.isEmpty()) {
       return res.status(400).json(error);
@@ -29,13 +30,32 @@ exports.register = async (req, res) => {
       firstName,
       lastName,
       password,
+      verifyToken: crypto.randomBytes(64).toString('hex'),
     });
-
     await newUser.save();
-
+    await sendEmail(newUser, req.headers.host);
     return res.json(newUser);
   } catch (err) {
     console.log(err.message);
     return res.status(500).json({ message: 'Internal server errors.' });
+  }
+};
+
+exports.verifyToken = async (req, res) => {
+  try {
+    const verifyToken = req.query.token;
+    const user = await User.findOne({ verifyToken: verifyToken });
+    if (!user) {
+      return res.status(400).json({
+        message: 'Token is invalid. Please contact us for assistance.',
+      });
+    }
+    user.verifyToken = null;
+    user.isVerified = true;
+    await user.save();
+    return res.json({ message: 'User verify' });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: 'Internal server error.' });
   }
 };
