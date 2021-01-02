@@ -75,7 +75,7 @@ router.post('/checkin',authenticate.verifyUser, (req, res, next) => {
 router.put('/checkout', authenticate.verifyUser, (req, res, next) => {   
   Check.findOne({username:req.body.username}).lean().exec((err,user)=>{
     if(!user.lastCheckOut || !moment(user.lastCheckOut).isSame(moment(), 'day')){
-      Check.findOneAndUpdate({username :req.body.username},{lastCheckOut:Date()},(err, updatedCheckout) =>{
+      Check.findOneAndUpdate({username :req.body.username},{lastCheckOut:Date()},{new:true},(err, updatedCheckout) =>{
         if (err) {
           return next(err);
         } else{
@@ -139,12 +139,12 @@ router.put('/activity',authenticate.verifyUser, (req, res, next) => {
     { "_id": req.body.parentId, "activities._id": req.body.childId },
     { 
         "$set": {
-            "activities.$.activity": req.body.activities.activity
+          "activities.$.status": req.body.activities.status,
+          "activities.$.activity": req.body.activities.activity
         },
-        "$set": {
-          "activities.$.status": req.body.activities.status
-        }
+        
     },
+    {new: true},
     (err,updatedComment)=>{
       if (err) {
         return next(err);
