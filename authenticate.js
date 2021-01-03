@@ -29,6 +29,10 @@ exports.google = passport.use(
                 username: profile.emails[0].value,
                 firstName: profile.name.givenName,
                 lastName: profile.name.familyName,
+                image:profile.photos[0].value,
+                address:'',
+                motto:'',
+                admin:false
               }).save().then((newUser) =>{
                 done(null, newUser);
               });
