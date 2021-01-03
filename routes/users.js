@@ -6,7 +6,6 @@ var authenticate = require('../authenticate');
 var cors = require('cors')
 var router = express.Router();
 var jwt = require('jsonwebtoken');
-const check = require('../models/check');
 
 router.use(bodyParser.json());
 
@@ -78,31 +77,21 @@ router.post('/register', cors(), (req, res, next) => {
     });
 });
 router.put('/update-user',authenticate.verifyUser, (req, res, next) => {
-  User.findById(req.body.id,(err,response)=>{
-    if(err){
-      return next(err)
-    }
-    // user = res
-    User.findOneAndUpdate({username:req.body.username},req.body,{new:true})
-        .exec((err,update)=>{
-            if(update &&update.username && req.body.username==update.username){
-              return next ('User Already exist')
-            }
-            if (err) {
-              return next(err);
-            } else{
-              response.username = req.body.username
-              response.save()
-              .then((checkStatus) => {
-                res.statusCode = 201;
-                res.setHeader("Content-Type", "application/json");
-                res.json(checkStatus);
-              }, (err) => next(err))
-              .catch((err) => next(err));
-              
-            }
-      })
-  })
+  User.findOneAndUpdate(
+    { username:req.body.username },
+    
+        req.body
+    ,
+    (err,update)=>{
+      if (err) {
+        return next(err);
+      } else{
+        console.log(update)
+        res.statusCode = 200;
+        res.setHeader('Content_type', 'application/json');
+        res.json(update);
+      }
+    })
 
 });
 
