@@ -6,6 +6,7 @@ var authenticate = require('../authenticate');
 var cors = require('cors')
 var router = express.Router();
 var jwt = require('jsonwebtoken');
+const check = require('../models/check');
 
 router.use(bodyParser.json());
 
@@ -49,6 +50,12 @@ router.post('/register', cors(), (req, res, next) => {
         if (req.body.motto){
           user.motto = req.body.motto;
         }else user.motto = ""
+        if (req.body.email){
+          user.email = req.body.email;
+        } else user.email = ""
+        if (req.body.job){
+          user.job = req.body.job;
+        }else user.job = ""
         user.save((err, user) => {
           passport.authenticate('local')(req, res, () => {
             if (err) {
@@ -71,23 +78,34 @@ router.post('/register', cors(), (req, res, next) => {
     });
 });
 router.put('/update-user',authenticate.verifyUser, (req, res, next) => {
-  User.findOneAndUpdate(
-    { username:req.body.username },
-    
-        req.body
-    ,
-    (err,update)=>{
-      if (err) {
-        return next(err);
-      } else{
-        console.log(update)
-        res.statusCode = 200;
-        res.setHeader('Content_type', 'application/json');
-        res.json(update);
-      }
-    })
+  User.findById(req.body.id,(err,response)=>{
+    if(err){
+      return next(err)
+    }
+    // user = res
+    User.findOneAndUpdate({username:req.body.username},req.body,{new:true})
+        .exec((err,update)=>{
+            if(update &&update.username && req.body.username==update.username){
+              return next ('User Already exist')
+            }
+            if (err) {
+              return next(err);
+            } else{
+              response.username = req.body.username
+              response.save()
+              .then((checkStatus) => {
+                res.statusCode = 201;
+                res.setHeader("Content-Type", "application/json");
+                res.json(checkStatus);
+              }, (err) => next(err))
+              .catch((err) => next(err));
+              
+            }
+      })
+  })
 
 });
+
 
 router.get(
   "/auth/google",
@@ -162,5 +180,42 @@ router.get('/refresh-token/:user', authenticate.verifyUser, (req, res, next) => 
       });
     }
   })
+});
+
+router.post("/changepassword", authenticate.verifyUser, function (req, res) {
+  User.findOne({ username: req.body.username }, (err, user) => {
+    // Check if error connecting
+    if (err) {
+      res.json({ success: false, message: err }); // Return error
+    } else {
+      // Check if user was found in database
+      if (!user) {
+        res.json({ success: false, message: "User not found" }); // Return error, user was not found in db
+      } else {
+        user.changePassword(
+          req.body.oldpassword,
+          req.body.newpassword,
+          function (err) {
+            if (err) {
+              if (err.name === "IncorrectPasswordError") {
+                res.json({ success: false, message: "Incorrect password" }); // Return error
+              } else {
+                res.json({
+                  success: false,
+                  message:
+                    "Something went wrong!! Please try again after sometimes.",
+                });
+              }
+            } else {
+              res.json({
+                success: true,
+                message: "Your password has been changed successfully",
+              });
+            }
+          }
+        );
+      }
+    }
+  });
 });
 module.exports = router;
