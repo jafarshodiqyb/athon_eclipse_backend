@@ -98,7 +98,6 @@ router.get('/auth/google/redirect',(req,res,next)=>{
     var token = authenticate.getToken(user);
     var payload = {
       token: token,
-      username: user.username,
       // firstName: user.firstName,
       // lastName: user.lastName,
       // address: user.address || "",
@@ -127,7 +126,6 @@ router.post('/login', function(req, res, next) {
         status: 'Login successful!',
         success: true,
         token: token,
-        username : user.username,
         // firstName : user.firstName,
         // lastName : user.lastName,
         // address: user.address || "",
@@ -159,7 +157,6 @@ router.get('/refresh-token/:user', authenticate.verifyUser, (req, res, next) => 
         status: 'Login successful!',
         success: true,
         token: token,
-        username : user,
 
               // token: token
       });
