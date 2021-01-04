@@ -13,7 +13,7 @@ router.use(bodyParser.json());
 
 router.get('/checkin/:id',authenticate.verifyUser, (req, res, next) => {
     var id = req.params.id
-    Check.findOne({username:id}).populate('username').lean().exec((err,users)=>{
+    Check.findOne({user:id}).populate('username').lean().exec((err,users)=>{
       if (err || users==null|| users==[]) {
               return next(err);
             } else {
@@ -27,12 +27,11 @@ router.get('/checkin/:id',authenticate.verifyUser, (req, res, next) => {
 router.post('/checkin',authenticate.verifyUser, (req, res, next) => {
         Check.find({}).populate("user")
             .then((check) => {
-              console.log()
-                var user = check.filter(cek => cek.username.toString() === req.body.id.toString())[0];
+                var user = check.filter(cek => cek.user.toString() === req.body.user.toString())[0];
                 var checkInHistory;
                 if(!user) {
                     user = new Check({
-                        username: req.body.id,
+                        user: req.body.user,
                         lastCheckIn : Date(),
                         lastCheckOut : "",
                         activities:[]
@@ -47,7 +46,7 @@ router.post('/checkin',authenticate.verifyUser, (req, res, next) => {
                   // checkInHistory.lastCheckIn = Date()
                 }
                 checkInHistory = new checkHistory({
-                  username: req.body.id,
+                  user: req.body.user,
                   lastCheckIn : Date(),
                   lastCheckOut : "",
                 })
@@ -75,15 +74,15 @@ router.post('/checkin',authenticate.verifyUser, (req, res, next) => {
  
 });
 router.put('/checkout', authenticate.verifyUser, (req, res, next) => {   
-  Check.findOne({username:req.body.id}).lean().exec((err,user)=>{
+  Check.findOne({user:req.body.user}).lean().exec((err,user)=>{
     if(!user.lastCheckOut || !moment(user.lastCheckOut).isSame(moment(), 'day')){
-      Check.findOneAndUpdate({username :req.body.id},{lastCheckOut:Date()},{new:true},(err, updatedCheckout) =>{
+      Check.findOneAndUpdate({user :req.body.user},{lastCheckOut:Date()},{new:true},(err, updatedCheckout) =>{
         if (err) {
           return next(err);
         } else{
           //find checkoutHistory
           const today = moment().startOf('day')
-          checkHistory.findOneAndUpdate({username:req.body.id,  lastCheckIn : {$gte: today.toDate(),
+          checkHistory.findOneAndUpdate({user:req.body.user,  lastCheckIn : {$gte: today.toDate(),
             $lte: moment(today).endOf('day').toDate()} } ,{lastCheckOut:Date()},(err,updated)=>{
               
               res.statusCode = 201;
