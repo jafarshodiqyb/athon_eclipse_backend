@@ -12,7 +12,7 @@ var Stories = new Schema({
   stories: [{
     url: String,
     duration: Number,
-    storiesDate:Date(),
+    storiesDate:Date,
     header: {
       heading: String,
       subheading: String,
