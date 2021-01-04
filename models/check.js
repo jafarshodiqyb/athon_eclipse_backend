@@ -2,7 +2,10 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var Check = new Schema({
-    username: String,
+    username: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+     },
     lastCheckIn : Date,
     lastCheckOut : Date,
     activities : [{

@@ -89,7 +89,7 @@ User.findByIdAndUpdate( { _id:req.body.id },req.body,{new:"true"},(err,update)=>
       }
     })
 
-});
+})
 
 
 router.get(

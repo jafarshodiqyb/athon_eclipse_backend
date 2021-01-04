@@ -11,9 +11,9 @@ var Check = require('../models/check');
 var router = express.Router();
 router.use(bodyParser.json());
 
-router.get('/checkin/:username',authenticate.verifyUser, (req, res, next) => {
-    var id = req.params.username
-    Check.findOne({username:id}).lean().exec((err,users)=>{
+router.get('/checkin/:id',authenticate.verifyUser, (req, res, next) => {
+    var id = req.params.id
+    Check.findOne({username:id}).populate('username').lean().exec((err,users)=>{
       if (err || users==null|| users==[]) {
               return next(err);
             } else {
@@ -25,17 +25,19 @@ router.get('/checkin/:username',authenticate.verifyUser, (req, res, next) => {
     })
 
 router.post('/checkin',authenticate.verifyUser, (req, res, next) => {
-        Check.find({})
+        Check.find({}).populate("user")
             .then((check) => {
-                var user = check.filter(cek => cek.username.toString() === req.body.username.toString())[0];
+              console.log()
+                var user = check.filter(cek => cek.username.toString() === req.body.id.toString())[0];
                 var checkInHistory;
                 if(!user) {
                     user = new Check({
-                        username: req.body.username,
+                        username: req.body.id,
                         lastCheckIn : Date(),
                         lastCheckOut : "",
                         activities:[]
                     });
+                    // user.user.push(req.body.username)
                     
 
               }else if(user && moment(user.lastCheckIn).isSame(moment(), 'day')){
@@ -45,7 +47,7 @@ router.post('/checkin',authenticate.verifyUser, (req, res, next) => {
                   // checkInHistory.lastCheckIn = Date()
                 }
                 checkInHistory = new checkHistory({
-                  username: req.body.username,
+                  username: req.body.id,
                   lastCheckIn : Date(),
                   lastCheckOut : "",
                 })
@@ -73,15 +75,15 @@ router.post('/checkin',authenticate.verifyUser, (req, res, next) => {
  
 });
 router.put('/checkout', authenticate.verifyUser, (req, res, next) => {   
-  Check.findOne({username:req.body.username}).lean().exec((err,user)=>{
+  Check.findOne({username:req.body.id}).lean().exec((err,user)=>{
     if(!user.lastCheckOut || !moment(user.lastCheckOut).isSame(moment(), 'day')){
-      Check.findOneAndUpdate({username :req.body.username},{lastCheckOut:Date()},{new:true},(err, updatedCheckout) =>{
+      Check.findOneAndUpdate({username :req.body.id},{lastCheckOut:Date()},{new:true},(err, updatedCheckout) =>{
         if (err) {
           return next(err);
         } else{
           //find checkoutHistory
           const today = moment().startOf('day')
-          checkHistory.findOneAndUpdate({username:req.body.username,  lastCheckIn : {$gte: today.toDate(),
+          checkHistory.findOneAndUpdate({username:req.body.id,  lastCheckIn : {$gte: today.toDate(),
             $lte: moment(today).endOf('day').toDate()} } ,{lastCheckOut:Date()},(err,updated)=>{
               
               res.statusCode = 201;
