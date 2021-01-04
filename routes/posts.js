@@ -5,20 +5,25 @@ const cloudinary = require("cloudinary");
 var Posts = require("../models/posts");
 
 router.get('/', authenticate.verifyUser, (req, res, next) => {
-    Posts.find({}, (err, users) => {
-      if (err) {
-        return next(err);
-      } else {
-        res.statusCode = 200;
-        res.setHeader('Content_type', 'application/json');
-        res.json(users);
-      }
-    }).sort({lastUpdate:'desc'})
+    Posts.find()
+      .sort({ lastUpdate: "desc" })
+      .populate("user")
+      .lean()
+      .exec((err, users) => {
+        if (err) {
+          return next(err);
+        } else {
+          res.statusCode = 200;
+          res.setHeader("Content_type", "application/json");
+          res.json(users);
+        }
+      })
+      
   });
 
 router.post("/", authenticate.verifyUser, (req, res, next) => {
         post = new Posts({
-          username: req.body.username,
+          user: req.body.user,
           image: req.body.image,
           lastUpdate: Date(),
           posts: 
