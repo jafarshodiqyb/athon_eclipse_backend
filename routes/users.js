@@ -76,15 +76,11 @@ router.post('/register', cors(), (req, res, next) => {
       }
     });
 });
-router.put('/update-user',authenticate.verifyUser, (req, res, next) => {
-  User.findOneAndUpdate(
-    { username:req.body.username },
-    
-        req.body
-    ,
-    (err,update)=>{
-      if (err) {
-        return next(err);
+router.put('/update-user',authenticate.verifyUser,(req, res, next) => {
+User.findByIdAndUpdate( { _id:req.body.id },req.body,{new:"true"},(err,update)=>{
+  if (err) {
+        console.log(err.codeName)
+        return next(err.codeName=='DuplicateKey'?'Username Already Exist':err);
       } else{
         console.log(update)
         res.statusCode = 200;
