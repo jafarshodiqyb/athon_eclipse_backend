@@ -99,14 +99,14 @@ router.put('/checkout', authenticate.verifyUser, (req, res, next) => {
 });
 
 router.post('/activity',authenticate.verifyUser, (req, res, next) => {
-    Check.findOne({username :req.body.username},(err, user) =>{
+    Check.findOne({user :req.body.user},(err, user) =>{
       if (err) {
         return next(err);
       }  else{
         var activitiesTemp = req.body.activities
         activitiesTemp.createdDate = Date()
-        activitiesTemp.assignee = req.body.username
-        activitiesTemp.creator = req.body.username
+        activitiesTemp.assignee = req.body.user
+        activitiesTemp.creator = req.body.user
         user.activities = user.activities.concat([activitiesTemp])
         // user.activities.push(req.body.activities)
         user.save()
