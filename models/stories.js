@@ -3,7 +3,10 @@ var Schema = mongoose.Schema;
 var passportLocalMongoose = require("passport-local-mongoose");
 
 var Stories = new Schema({
-  username: String,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+ },
   image : String,
   lastUpdate:Date,
   stories: [{

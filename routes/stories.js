@@ -4,26 +4,30 @@ var authenticate = require("../authenticate");
 const cloudinary = require("cloudinary");
 var Stories = require("../models/stories");
 
-router.get('/', authenticate.verifyUser, (req, res, next) => {
-    Stories.find({}, (err, users) => {
+router.get("/", authenticate.verifyUser, (req, res, next) => {
+  Stories.find({})
+  .sort({ lastUpdate: "desc" })
+  .populate("user")
+  .lean()
+  .exec((err, users) => {
       if (err) {
         return next(err);
       } else {
         res.statusCode = 200;
-        res.setHeader('Content_type', 'application/json');
+        res.setHeader("Content_type", "application/json");
         res.json(users);
       }
-    }).sort({lastUpdate:'desc'})
-  });
+    });
+});
 router.post("/", authenticate.verifyUser, (req, res, next) => {
   Stories.find({})
     .then((stories) => {
         var story = stories.filter(
-            (cek) => cek.username.toString() === req.body.username.toString()
+            (cek) => cek.user.toString() === req.body.user.toString()
             )[0];
       if (!story) {
         story = new Stories({
-          username: req.body.username,
+          user: req.body.user,
           image:req.body.image,
           lastUpdate: Date(),
           stories: [
@@ -31,7 +35,7 @@ router.post("/", authenticate.verifyUser, (req, res, next) => {
           ],
         });
       } else if (story) {
-        Stories.findOneAndUpdate({'username' : req.body.username},{lastUpdate:Date(),$push:{'stories':req.body.stories}},(err,res)=>{
+        Stories.findOneAndUpdate({'user' : req.body.user},{lastUpdate:Date(),$push:{'stories':req.body.stories}},(err,res)=>{
             // res.json(ret)
         })
       }
