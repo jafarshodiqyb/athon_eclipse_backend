@@ -25,13 +25,15 @@ router.get('/:user', authenticate.verifyUser, (req, res, next) => {
 router.post('/register', cors(), (req, res, next) => {
   User.register(new User({
       username: req.body.username,
+      isSetPassword :true,
+      email : req.body.email
     }),
     req.body.password, (err, user) => {
       if (err) {
         res.statusCode = 500;
         res.setHeader('Content-Type', 'application/json');
         res.json({
-          err: err
+          message: 'A user with the given username or email is already registered'
         });
       } else {
         if (req.body.firstName) {
@@ -49,9 +51,6 @@ router.post('/register', cors(), (req, res, next) => {
         if (req.body.motto){
           user.motto = req.body.motto;
         }else user.motto = ""
-        if (req.body.email){
-          user.email = req.body.email;
-        } else user.email = ""
         if (req.body.job){
           user.job = req.body.job;
         }else user.job = ""

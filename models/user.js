@@ -15,12 +15,16 @@ var User = new Schema({
     image:String,
     address:String,
     motto:String,
+    isSetPassword:{
+        type:Boolean,
+        default:false
+    },
     admin:   {
         type: Boolean,
         default: false
     }
-},{strict:false});
+});
 
-User.plugin(passportLocalMongoose);
+User.plugin(passportLocalMongoose,{usernameQueryFields: ["username","email"],usernameField : "email"});
 
 module.exports = mongoose.model('User', User);
