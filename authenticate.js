@@ -33,6 +33,7 @@ exports.google = passport.use(
                 image:profile.photos[0].value,
                 address:'',
                 motto:'',
+                job:'',
                 admin:false
               }).save().then((newUser) =>{
                 done(null, newUser);
