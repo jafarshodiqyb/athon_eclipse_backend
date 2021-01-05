@@ -19,7 +19,7 @@ var User = new Schema({
         type: Boolean,
         default: false
     }
-});
+},{strict:false});
 
 User.plugin(passportLocalMongoose);
 

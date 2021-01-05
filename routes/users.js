@@ -167,15 +167,49 @@ router.get('/refresh-token/:user', authenticate.verifyUser, (req, res, next) => 
   })
 });
 
-router.post("/changepassword", authenticate.verifyUser, function (req, res) {
-  User.findOne({ username: req.body.username }, (err, user) => {
+router.post("/setpassword", authenticate.verifyUser, function (req, res,next) {
+  User.findOne({ _id: req.body.id }, (err, user) => {
     // Check if error connecting
     if (err) {
-      res.json({ success: false, message: err }); // Return error
+      return next(err); // Return error
     } else {
       // Check if user was found in database
       if (!user) {
-        res.json({ success: false, message: "User not found" }); // Return error, user was not found in db
+        return next('User not found')
+      } else {
+        user.setPassword(
+          req.body.newpassword,
+          function (err) {
+            if (err) {
+              if (err.name === "IncorrectPasswordError") {
+                return next('Incorrect password'); // Return error
+              } else {
+                return next("Something went wrong!! Please try again after sometimes.")
+              }
+            } else {
+              user.save().then((set)=>{
+                res.json({
+                  // success: true,
+                  message: "Your password has been set successfully",
+                });
+              })
+            }
+          }
+        );
+      }
+    }
+  });
+});
+
+router.post("/changepassword", authenticate.verifyUser, function (req, res,next) {
+  User.findOne({ _id: req.body.id }, (err, user) => {
+    // Check if error connecting
+    if (err) {
+      return next(err); // Return error
+    } else {
+      // Check if user was found in database
+      if (!user) {
+        return next('User not found')
       } else {
         user.changePassword(
           req.body.oldpassword,
@@ -183,17 +217,13 @@ router.post("/changepassword", authenticate.verifyUser, function (req, res) {
           function (err) {
             if (err) {
               if (err.name === "IncorrectPasswordError") {
-                res.json({ success: false, message: "Incorrect password" }); // Return error
+                return next('Incorrect password'); // Return error
               } else {
-                res.json({
-                  success: false,
-                  message:
-                    "Something went wrong!! Please try again after sometimes.",
-                });
+                return next("Something went wrong!! Please try again after sometimes.")
               }
             } else {
               res.json({
-                success: true,
+                // success: true,
                 message: "Your password has been changed successfully",
               });
             }
