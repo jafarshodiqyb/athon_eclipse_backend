@@ -147,10 +147,9 @@ res.status(200).json({
 });
 });
 
-router.get('/refresh-token/:user', authenticate.verifyUser, (req, res, next) => {
-  var user = req.params.user
-  User.find({username:user}, (err, users) => {
-    console.log(users)
+router.get('/refresh-token/:id', authenticate.verifyUser, (req, res, next) => {
+  var user = req.params.id
+  User.find({_id:user}, (err, users) => {
     if (err) {
       return next(err);
     } else {
@@ -186,6 +185,7 @@ router.post("/setpassword", authenticate.verifyUser, function (req, res,next) {
                 return next("Something went wrong!! Please try again after sometimes.")
               }
             } else {
+              user.isSetPassword = true
               user.save().then((set)=>{
                 res.json({
                   // success: true,
