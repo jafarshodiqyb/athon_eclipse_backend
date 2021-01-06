@@ -20,10 +20,11 @@ router.get("/", authenticate.verifyUser, (req, res, next) => {
     });
 });
 router.post("/", authenticate.verifyUser, (req, res, next) => {
-  Stories.find({})
+  Stories.find({}).populate("user")
     .then((stories) => {
-        var story = stories.filter( (cek) => cek.user === req.body.user)[0];
+        var story = stories.filter( (cek) => cek.user.toString() === req.body.user.toString())[0];
         // var user = check.filter(cek => cek.user.toString() === req.body.user.toString())[0];
+        console.log(story)
       if (!story) {
         story = new Stories({
           user: req.body.user,
@@ -34,7 +35,7 @@ router.post("/", authenticate.verifyUser, (req, res, next) => {
           ],
         });
       } else if (story) {
-        Stories.findOneAndUpdate({'user' : req.body.user},{lastUpdate:Date(),$push:{'stories':req.body.stories}},{new:true},(err,res)=>{
+        Stories.findOneAndUpdate({'user' : req.body.user},{lastUpdate:Date(),$push:{'stories':req.body.stories}},(err,res)=>{
             // res.json(ret)
         })
       }

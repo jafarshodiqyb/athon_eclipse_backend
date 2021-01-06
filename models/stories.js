@@ -1,6 +1,7 @@
 var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 var passportLocalMongoose = require("passport-local-mongoose");
+const beautifyUnique = require('mongoose-beautiful-unique-validation');
 
 var Stories = new Schema({
   user: {
@@ -22,5 +23,6 @@ var Stories = new Schema({
 }, { strict: false });
 
 Stories.plugin(passportLocalMongoose);
+Stories.plugin(beautifyUnique)
 
 module.exports = mongoose.model("Stories", Stories);

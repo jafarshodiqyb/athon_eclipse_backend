@@ -27,7 +27,7 @@ router.get('/checkin/:id',authenticate.verifyUser, (req, res, next) => {
 router.post('/checkin',authenticate.verifyUser, (req, res, next) => {
         Check.find({}).populate("user")
             .then((check) => {
-                var user = check.filter(cek => cek.user === req.body.user)[0];
+                var user = check.filter(cek => cek.user.toString() === req.body.user.toString())[0];
                 var checkInHistory;
                 if(!user) {
                     user = new Check({
