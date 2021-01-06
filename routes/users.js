@@ -119,7 +119,9 @@ router.post('/login', function(req, res, next) {
       return next(err);
     }
     if (!user) {
-      return res.status(401).json({
+      if(info.name=='NoSaltValueStoredError'){
+        return next('Please login using Google, Facebook, or Twitter')
+      } else return res.status(401).json({
         err: info
       });
     }
