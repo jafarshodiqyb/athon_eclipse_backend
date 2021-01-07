@@ -22,9 +22,8 @@ router.get("/", authenticate.verifyUser, (req, res, next) => {
 router.post("/", authenticate.verifyUser, (req, res, next) => {
   Stories.find({}).populate("user")
     .then((stories) => {
-        var story = stories.filter( (cek) => cek.user.toString() === req.body.user.toString())[0];
+        var story = stories.filter( (cek) => cek.user._id.toString() === req.body.user.toString())[0];
         // var user = check.filter(cek => cek.user.toString() === req.body.user.toString())[0];
-        console.log(story)
       if (!story) {
         story = new Stories({
           user: req.body.user,
