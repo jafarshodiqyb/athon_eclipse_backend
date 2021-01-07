@@ -94,8 +94,8 @@ User.findByIdAndUpdate( { _id:req.body.id },req.body,{new:"true"},(err,update)=>
 router.get(
   "/auth/google",
   passport.authenticate("google",{scope: ["profile", "email"]}))
-router.get('/auth/google/redirect',(req,res,next)=>{
 
+router.get('/auth/google/redirect',(req,res,next)=>{
   passport.authenticate('google',function(err,user,info){
     var token = authenticate.getToken(user);
     var payload = {
@@ -108,8 +108,8 @@ router.get('/auth/google/redirect',(req,res,next)=>{
 router.get(
   "/auth/facebook",
   passport.authenticate("facebook",{scope: "email"}))
-router.get('/auth/facebook/redirect',(req,res,next)=>{
 
+router.get('/auth/facebook/redirect',(req,res,next)=>{
   passport.authenticate('facebook',function(err,user,info){
     var token = authenticate.getToken(user);
     var payload = {
@@ -120,6 +120,20 @@ router.get('/auth/facebook/redirect',(req,res,next)=>{
 })
 
   
+router.get(
+  "/auth/instagram",
+  passport.authenticate("instagram"))
+
+router.get('/auth/instagram/redirect',(req,res,next)=>{
+  passport.authenticate('instagram',function(err,user,info){
+    var token = authenticate.getToken(user);
+    var payload = {
+      token: token,
+    }
+    res.redirect('http://localhost:3006/login/' +new URLSearchParams(payload))
+  })(req,res,next);
+})
+
 
 
 router.post('/login', function(req, res, next) {

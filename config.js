@@ -7,6 +7,10 @@ module.exports = {
     clientID:"320564932730151",
     clientSecret: "2fa39bea89b5790b0a7ad5c06c533b47",
   },
+  instagram: {
+    clientID:"394813681579748",
+    clientSecret: "9b10b97874e1d4c086eb0df85b45d8f1",
+  },
   google: {
     clientID:
       "415365313044-vshdl9s12ntb9q1cq8oanik7f78kstb9.apps.googleusercontent.com",

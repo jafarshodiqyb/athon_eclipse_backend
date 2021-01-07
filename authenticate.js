@@ -8,6 +8,7 @@ var ExtractJwt = require('passport-jwt').ExtractJwt;
 var jwt = require('jsonwebtoken');
 var passport = require('passport')
 var FacebookStrategy = require('passport-facebook');
+var InstagramStrategy = require('passport-instagram').Strategy;
 var config = require('./config');
 
 exports.local = passport.use(new LocalStrategy(User.authenticate()));
@@ -80,6 +81,40 @@ exports.facebook = passport.use(
       })
   );
 
+  exports.instagram = passport.use(
+    new InstagramStrategy(
+      {
+        clientID: config.instagram.clientID,
+        clientSecret: config.instagram.clientSecret,
+        callbackURL: "http://localhost:3000/users/auth/instagram/redirect",
+      },
+      async function(accessToken, refreshToken, profile, done) {
+          // passport callback function
+          //check if user already exists in our db with the given profile ID
+          console.log(profile)
+          await User.findOne({email: profile.emails[0].value}).then((currentUser)=>{
+            if(currentUser){
+              //if we already have a record with the given profile ID
+              done(null, currentUser);
+            } else{
+                 //if not, create a new user 
+                new User({
+                  username: 'ig-'+profile.id,
+                  email: profile.emails[0].value,
+                  firstName: profile.name.givenName,
+                  lastName: profile.name.familyName,
+                  image:profile.photos[0].value,
+                  address:'',
+                  motto:'',
+                  job:'',
+                  admin:false
+                }).save().then((newUser) =>{
+                  done(null, newUser);
+                });
+             } 
+          })
+        })
+    );
   passport.serializeUser(function(user, done) {
     done(null, user);
   });
