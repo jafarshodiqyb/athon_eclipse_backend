@@ -6,7 +6,8 @@ var User = require('./models/user');
 var JwtStrategy = require('passport-jwt').Strategy;
 var ExtractJwt = require('passport-jwt').ExtractJwt;
 var jwt = require('jsonwebtoken');
-
+var passport = require('passport')
+var FacebookStrategy = require('passport-facebook');
 var config = require('./config');
 
 exports.local = passport.use(new LocalStrategy(User.authenticate()));
@@ -26,7 +27,7 @@ exports.google = passport.use(
           } else{
                //if not, create a new user 
               new User({
-                // username: profile.emails[0].value,
+                username: 'g-'+profile.id,
                 email: profile.emails[0].value,
                 firstName: profile.name.givenName,
                 lastName: profile.name.familyName,
@@ -42,6 +43,43 @@ exports.google = passport.use(
         })
       })
   );
+
+  
+exports.facebook = passport.use(
+  new FacebookStrategy(
+    {
+      clientID: config.facebook.clientID,
+      clientSecret: config.facebook.clientSecret,
+      callbackURL: "/users/auth/facebook/redirect",
+      profileFields: ["id", "gender", "profileUrl", "name", "emails", "photos"],
+    },
+    async function(accessToken, refreshToken, profile, done) {
+        // passport callback function
+        //check if user already exists in our db with the given profile ID
+        await User.findOne({email: profile.emails[0].value}).then((currentUser)=>{
+          if(currentUser){
+            //if we already have a record with the given profile ID
+            done(null, currentUser);
+          } else{
+               //if not, create a new user 
+              new User({
+                username: 'fb-'+profile.id,
+                email: profile.emails[0].value,
+                firstName: profile.name.givenName,
+                lastName: profile.name.familyName,
+                image:profile.photos[0].value,
+                address:'',
+                motto:'',
+                job:'',
+                admin:false
+              }).save().then((newUser) =>{
+                done(null, newUser);
+              });
+           } 
+        })
+      })
+  );
+
   passport.serializeUser(function(user, done) {
     done(null, user);
   });

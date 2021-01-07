@@ -100,19 +100,28 @@ router.get('/auth/google/redirect',(req,res,next)=>{
     var token = authenticate.getToken(user);
     var payload = {
       token: token,
-      // firstName: user.firstName,
-      // lastName: user.lastName,
-      // address: user.address || "",
-      // motto: user.motto|| "",
-      // image: user.image|| "",
-
     }
     res.redirect('http://localhost:3006/login/' +new URLSearchParams(payload))
-
   })(req,res,next);
-
-
 })
+
+router.get(
+  "/auth/facebook",
+  passport.authenticate("facebook",{scope: "email"}))
+router.get('/auth/facebook/redirect',(req,res,next)=>{
+
+  passport.authenticate('facebook',function(err,user,info){
+    var token = authenticate.getToken(user);
+    var payload = {
+      token: token,
+    }
+    res.redirect('http://localhost:3006/login/' +new URLSearchParams(payload))
+  })(req,res,next);
+})
+
+  
+
+
 router.post('/login', function(req, res, next) {
   passport.authenticate('local', function(err, user, info) {
     if (err) {
