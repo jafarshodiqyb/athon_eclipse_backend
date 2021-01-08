@@ -1,39 +1,27 @@
 var express = require('express');
 var path = require('path');
-var favicon = require('serve-favicon');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
 var passport = require('passport');
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const cloudinary = require('cloudinary')
 var cors = require('cors');
-var config = require('./config');
-const formData = require('express-form-data')
 
-mongoose.connect(config.mongo.mongoUrl);
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function () {
-    // we're connected!
-    console.log("Connected correctly to server");
-});
-cloudinary.config({ 
-  cloud_name: config.cloudinary.cloud_name, 
-  api_key: config.cloudinary.api_key, 
-  api_secret: config.cloudinary.api_secret
-})
-  
+if(process.env.ENVQ){
+  require("dotenv").config({
+    path:path.resolve(__dirname, '.env.'+process.env.ENVQ.trim()),
+  });
+} else require("dotenv").config()
+
+const formData = require('express-form-data')
+const connectDB = require('./config/db');
+const connectCloudinary = require('./config/cloudinary');
 var index = require('./routes/index');
 var users = require('./routes/users');
 var check = require('./routes/check');
 var stories = require('./routes/stories');
 var posts = require('./routes/posts');
 
-
-// var dishRouter = require('./routes/dishRouter');
-// var promoRouter = require('./routes/promoRouter');
-// var leaderRouter = require('./routes/leaderRouter');
+connectDB()
+connectCloudinary()
 
 var app = express();
 app.use(formData.parse())
@@ -60,12 +48,6 @@ app.use('/users', users);
 app.use('/check', check);
 app.use('/stories', stories);
 app.use('/posts', posts);
-
-
-
-// app.use('/dishes',dishRouter);
-// app.use('/promotions',promoRouter);
-// app.use('/leadership',leaderRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

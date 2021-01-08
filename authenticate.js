@@ -9,14 +9,13 @@ var jwt = require('jsonwebtoken');
 var passport = require('passport')
 var FacebookStrategy = require('passport-facebook');
 var InstagramStrategy = require('passport-instagram').Strategy;
-var config = require('./config');
 
 exports.local = passport.use(new LocalStrategy(User.authenticate()));
 exports.google = passport.use(
     new GoogleStrategy({
-        clientID: config.google.clientID,
-        clientSecret: config.google.clientSecret,
-        callbackURL: `http://localhost:3000/users/auth/google/redirect`,
+        clientID: process.env.PASSPORT_GOOGLE_CLIENT_ID,
+        clientSecret: process.env.PASSPORT_GOOGLE_CLIENT_SECRET,
+        callbackURL: `${process.env.SERVER_URL}/users/auth/google/redirect`,
         
     }, async function(accessToken, refreshToken, profile, done) {
         // passport callback function
@@ -49,9 +48,9 @@ exports.google = passport.use(
 exports.facebook = passport.use(
   new FacebookStrategy(
     {
-      clientID: config.facebook.clientID,
-      clientSecret: config.facebook.clientSecret,
-      callbackURL: "/users/auth/facebook/redirect",
+      clientID: process.env.PASSPORT_FACEBOOK_CLIENT_ID,
+      clientSecret: process.env.PASSPORT_FACEBOOK_CLIENT_SECRET,
+      callbackURL: `${process.env.SERVER_URL}/users/auth/facebook/redirect`,
       profileFields: ["id", "gender", "profileUrl", "name", "emails", "photos"],
     },
     async function(accessToken, refreshToken, profile, done) {
@@ -84,9 +83,9 @@ exports.facebook = passport.use(
   exports.instagram = passport.use(
     new InstagramStrategy(
       {
-        clientID: config.instagram.clientID,
-        clientSecret: config.instagram.clientSecret,
-        callbackURL: "http://localhost:3000/users/auth/instagram/redirect",
+        clientID: process.env.PASSPORT_INSTAGRAM_CLIENT_ID,
+        clientSecret: process.env.PASSPORT_INSTAGRAM_CLIENT_SECRET,
+        callbackURL: `${process.env.SERVER_URL}/users/auth/instagram/redirect`,
       },
       async function(accessToken, refreshToken, profile, done) {
           // passport callback function
@@ -124,14 +123,14 @@ exports.facebook = passport.use(
   });
 
 exports.getToken = function (user) {
-    return jwt.sign(user, config.mongo.secretKey, {
+    return jwt.sign(user, process.env.MONGO_SECRET_KEY, {
         expiresIn: 3600
     });
 }
 
 var opts = {};
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-opts.secretOrKey = config.mongo.secretKey;
+opts.secretOrKey = process.env.MONGO_SECRET_KEY;
 
 exports.jwtPassport = passport.use(new JwtStrategy(opts, (jwt_payload, done) => {
     User.findOne({
@@ -152,7 +151,7 @@ exports.verifyUser = function (req, res, next) {
     var auth = req.headers.authorization? req.headers.authorization.substring(7, req.headers.authorization.length):null;
     var token = req.body.token || req.query.token ||  auth ||req.headers['x-access-token'];
     if (token) {
-        jwt.verify(token, config.mongo.secretKey, function (err, decoded) {
+        jwt.verify(token, process.env.MONGO_SECRET_KEY, function (err, decoded) {
             if (err) {
                 var err = new Error('You are not authenticated!');
                 err.status = 401;

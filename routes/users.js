@@ -101,7 +101,7 @@ router.get('/auth/google/redirect',(req,res,next)=>{
     var payload = {
       token: token,
     }
-    res.redirect('http://localhost:3006/login/' +new URLSearchParams(payload))
+    res.redirect(`${process.env.CLIENT_URL}/login/` +new URLSearchParams(payload))
   })(req,res,next);
 })
 
@@ -115,7 +115,7 @@ router.get('/auth/facebook/redirect',(req,res,next)=>{
     var payload = {
       token: token,
     }
-    res.redirect('http://localhost:3006/login/' +new URLSearchParams(payload))
+    res.redirect(`${process.env.CLIENT_URL}/login/` +new URLSearchParams(payload))
   })(req,res,next);
 })
 
@@ -130,7 +130,7 @@ router.get('/auth/instagram/redirect',(req,res,next)=>{
     var payload = {
       token: token,
     }
-    res.redirect('http://localhost:3006/login/' +new URLSearchParams(payload))
+    res.redirect(`${process.env.CLIENT_URL}/login/` +new URLSearchParams(payload))
   })(req,res,next);
 })
 
