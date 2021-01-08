@@ -5,9 +5,9 @@ var bodyParser = require('body-parser');
 var passport = require('passport');
 var cors = require('cors');
 
-if(process.env.ENVQ){
+if(process.env.ENV){
   require("dotenv").config({
-    path:path.resolve(__dirname, '.env.'+process.env.ENVQ.trim()),
+    path:path.resolve(__dirname, '.env.'+process.env.ENV.trim()),
   });
 } else require("dotenv").config()
 
