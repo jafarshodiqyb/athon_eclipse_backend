@@ -25,7 +25,7 @@ connectCloudinary()
 
 var app = express();
 app.use(formData.parse())
-app.use(cors({origin: process.env.CLIENT_URL}))
+app.use(cors())
 app.set('port', 3000);
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
