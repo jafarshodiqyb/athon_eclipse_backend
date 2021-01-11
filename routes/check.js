@@ -40,7 +40,7 @@ router.post('/checkin',authenticate.verifyUser, (req, res, next) => {
                     
 
               }else if(user && moment(user.lastCheckIn).isSame(moment(), 'day')){
-                  return next('You have checked in today!');
+                  return next({message:'You have checked in today!'});
                 } else {
                   user.lastCheckIn = Date()
                   // checkInHistory.lastCheckIn = Date()
@@ -92,7 +92,7 @@ router.put('/checkout', authenticate.verifyUser, (req, res, next) => {
         }  
       })
     } else 
-    return next('You have already checkout today!')
+    return next({message:'You have already checkout today!'})
   })
             
   
