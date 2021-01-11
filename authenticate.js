@@ -35,7 +35,8 @@ exports.google = passport.use(
                 address:'',
                 motto:'',
                 job:'',
-                admin:false
+                admin:false,
+                isVerified:true
               }).save().then((newUser) =>{
                 done(null, newUser);
               });
@@ -71,7 +72,8 @@ exports.facebook = passport.use(
                 address:'',
                 motto:'',
                 job:'',
-                admin:false
+                admin:false,
+                isVerified:true
               }).save().then((newUser) =>{
                 done(null, newUser);
               });

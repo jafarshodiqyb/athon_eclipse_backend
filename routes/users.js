@@ -6,6 +6,8 @@ var authenticate = require('../authenticate');
 var cors = require('cors')
 var router = express.Router();
 var jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const { sendEmail } = require('../helpers/email');
 
 router.use(bodyParser.json());
 
@@ -28,7 +30,7 @@ router.post('/register', cors(), (req, res, next) => {
       isSetPassword :true,
       email : req.body.email
     }),
-    req.body.password, (err, user) => {
+    req.body.password, async (err, user) => {
       if (err) {
         res.statusCode = 500;
         res.setHeader('Content-Type', 'application/json');
@@ -54,6 +56,8 @@ router.post('/register', cors(), (req, res, next) => {
         if (req.body.job){
           user.job = req.body.job;
         }else user.job = ""
+        user.verifyToken= crypto.randomBytes(64).toString('hex'),
+        await sendEmail(user, process.env.SERVER_URL);
         user.save((err, user) => {
           passport.authenticate('local')(req, res, () => {
             if (err) {
@@ -68,7 +72,7 @@ router.post('/register', cors(), (req, res, next) => {
             res.setHeader('Content-Type', 'application/json');
             res.json({
               success: true,
-              status: 'Registration Successful!'
+              status: 'Registration Successful. Please check email for verification!'
             });
           });
         });
@@ -79,7 +83,7 @@ router.put('/update-user',authenticate.verifyUser,(req, res, next) => {
 User.findByIdAndUpdate( { _id:req.body.id },req.body,{new:"true"},(err,update)=>{
   if (err) {
         console.log(err.codeName)
-        return next(err.codeName=='DuplicateKey'?'Username Already Exist':err);
+        return next(err.codeName=='DuplicateKey'?{message:'Username Already Exist'}:err);
       } else{
         console.log(update)
         res.statusCode = 200;
@@ -147,6 +151,10 @@ router.post('/login', function(req, res, next) {
       } else return res.status(401).json({
         err: info
       });
+    }
+    console.log(user.isVerified)
+    if(!user.isVerified && user.verifyToken){
+      return next({message:'Please check your email and verify your account!'})
     }
       var token = authenticate.getToken(user);
         res.status(200).json({
@@ -257,4 +265,27 @@ router.post("/changepassword", authenticate.verifyUser, function (req, res,next)
     }
   });
 });
+
+router.get("/auth/verify-email", function (req, res,next) {
+  var verifyToken = req.query.token
+  User.findOne({ verifyToken: verifyToken },(err,user)=>{
+    if(err){
+      return next(err)
+    }
+    if (!user) {
+      return res.status(400).json({
+        message: 'Token is invalid. Please contact us for assistance.',
+      });
+    }
+    user.verifyToken = null;
+    user.isVerified = true;
+    user.save().then((set)=>{
+      res.status(200).json({
+        // success: true,
+        message: "Your Account has been verified",
+      });
+    })
+  })
+})
+
 module.exports = router;

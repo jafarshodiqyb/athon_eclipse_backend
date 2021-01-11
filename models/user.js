@@ -15,6 +15,14 @@ var User = new Schema({
     image:String,
     address:String,
     motto:String,
+    verifyToken:{
+        type:String,
+        default:null
+    },
+    isVerified : {
+        type:Boolean,
+        default:false,
+    },
     isSetPassword:{
         type:Boolean,
         default:false
