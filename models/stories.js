@@ -1,6 +1,5 @@
 var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
-var passportLocalMongoose = require("passport-local-mongoose");
 const beautifyUnique = require('mongoose-beautiful-unique-validation');
 
 var Stories = new Schema({
@@ -8,7 +7,6 @@ var Stories = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User"
  },
-  image : String,
   lastUpdate:Date,
   stories: [{
     url: String,
@@ -20,9 +18,8 @@ var Stories = new Schema({
       profileImage: String,
     }
   }],
-}, { strict: false });
+});
 
-Stories.plugin(passportLocalMongoose);
 Stories.plugin(beautifyUnique)
 
 module.exports = mongoose.model("Stories", Stories);

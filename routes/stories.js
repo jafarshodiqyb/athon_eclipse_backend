@@ -20,33 +20,31 @@ router.get("/", authenticate.verifyUser, (req, res, next) => {
     });
 });
 router.post("/", authenticate.verifyUser, (req, res, next) => {
-  Stories.find({}).populate("user")
-    .then((stories) => {
-        var story = stories.filter( (cek) => cek.user._id.toString() === req.body.user.toString())[0];
+  Stories.findOneAndUpdate({'user' : req.body.user},{lastUpdate:Date(),$push:{'stories':req.body.stories}},(err,story) => {
+      console.log(story)
+        // var story = stories.filter( (cek) => cek.user.toString() === req.body.user.toString())[0];
         // var user = check.filter(cek => cek.user.toString() === req.body.user.toString())[0];
-      if (!story) {
+      
+        if (!story) {
         story = new Stories({
           user: req.body.user,
-          image:req.body.image,
           lastUpdate: Date(),
           stories: [
             req.body.stories
           ],
         });
-      } else if (story) {
-        Stories.findOneAndUpdate({'user' : req.body.user},{lastUpdate:Date(),$push:{'stories':req.body.stories}},(err,res)=>{
-            // res.json(ret)
-        })
-      }
+      } 
+      console.log(story)
       story.save().then(
         (savedStories) => {
-          res.statusCode = 201;
-          res.setHeader("Content-Type", "application/json");
-          res.json(savedStories);
+          savedStories.populate("user").execPopulate().then((reso,err)=>{
+            res.statusCode = 201;
+            res.setHeader("Content-Type", "application/json");
+            res.json(reso);
+          })
         },
         (err) => next(err)
       );
     })
-    .catch((err) => next(err));
 });
 module.exports = router;
